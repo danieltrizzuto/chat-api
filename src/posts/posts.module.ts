@@ -8,8 +8,8 @@ import { AuthModule } from 'src/auth/auth.module';
 import { EnvironmentVariables } from 'src/configuration';
 import { UsersModule } from './../users/users.module';
 import {
+  GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN,
   RBMQ_PROXY_TOKEN,
-  SUBSCRIPTIONS_PUB_SUB_TOKEN,
 } from './constants/index';
 import { PostsController } from './posts.controller';
 import { PostsResolver } from './posts.resolver';
@@ -50,7 +50,7 @@ const logger: any = ConsoleLogger.create('Chat API');
     PostsResolver,
     PostsService,
     {
-      provide: SUBSCRIPTIONS_PUB_SUB_TOKEN,
+      provide: GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN,
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         const broker = config.get<EnvironmentVariables['broker']>('broker');
