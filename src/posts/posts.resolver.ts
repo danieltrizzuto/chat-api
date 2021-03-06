@@ -1,5 +1,11 @@
-import { Inject, Logger, UseGuards } from '@nestjs/common';
+import {
+  Inject,
+  Logger,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { Args, Mutation, Resolver, Subscription } from '@nestjs/graphql';
+import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import { AmqpPubSub } from 'graphql-rabbitmq-subscriptions';
 import { GqlAuthGuard } from 'src/auth/decorators/auth.guard';
@@ -11,7 +17,7 @@ import {
   SUBSCRIPTIONS_PUB_SUB_TOKEN,
 } from './constants';
 import { MessageRequestData } from './interfaces/dto';
-import { CreatePostInput } from './interfaces/inputs';
+import { CreatePostInput, PostCreatedInput } from './interfaces/inputs';
 import { CreatePostResponse, PostResponse } from './interfaces/responses';
 
 @Resolver()
@@ -20,6 +26,7 @@ export class PostsResolver {
     @Inject(RBMQ_PROXY_TOKEN) private rbmqProxy: ClientProxy,
     @Inject(SUBSCRIPTIONS_PUB_SUB_TOKEN)
     private readonly subscriptionsPubSub: AmqpPubSub,
+    private readonly jwtService: JwtService,
   ) {}
 
   @UseGuards(GqlAuthGuard)
@@ -49,7 +56,13 @@ export class PostsResolver {
   }
 
   @Subscription((returns) => PostResponse)
-  postCreated() {
+  postCreated(@Args('input') input: PostCreatedInput) {
+    try {
+      this.jwtService.verify(input.accessToken);
+    } catch {
+      throw new UnauthorizedException();
+    }
+
     return this.subscriptionsPubSub.asyncIterator(MESSAGE_CREATED_PATTERN);
   }
 }

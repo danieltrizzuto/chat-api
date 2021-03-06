@@ -7,3 +7,9 @@ export class CreatePostInput {
   @Field()
   body: string;
 }
+
+@InputType()
+export class PostCreatedInput {
+  @Field()
+  accessToken: string;
+}

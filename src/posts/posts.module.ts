@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AmqpPubSub } from 'graphql-rabbitmq-subscriptions';
+import { AuthModule } from 'src/auth/auth.module';
 import { EnvironmentVariables } from 'src/configuration';
 import { UsersModule } from './../users/users.module';
 import {
@@ -18,6 +19,7 @@ import { PostDocument, PostSchema } from './schemas/post.schema';
 const logger: any = ConsoleLogger.create('Chat API');
 @Module({
   imports: [
+    AuthModule,
     ConfigModule,
     UsersModule,
     MongooseModule.forFeature([

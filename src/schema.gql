@@ -44,5 +44,9 @@ input CreatePostInput {
 }
 
 type Subscription {
-  postCreated: PostResponse!
+  postCreated(input: PostCreatedInput!): PostResponse!
+}
+
+input PostCreatedInput {
+  accessToken: String!
 }
