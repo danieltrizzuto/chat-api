@@ -26,4 +26,8 @@ export class PostsService {
     });
     return post.toObject();
   }
+
+  async postsByRoom(roomId: string) {
+    return this.postModel.find({ roomId });
+  }
 }

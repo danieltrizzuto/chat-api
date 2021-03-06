@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { Args, Mutation, Resolver, Subscription } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy } from '@nestjs/microservices';
 import { AmqpPubSub } from 'graphql-rabbitmq-subscriptions';
@@ -17,8 +17,13 @@ import {
   NEW_POST_REQUEST_RECEIVED,
 } from './constants';
 import { ClientPostRequestEventPayload } from './interfaces/dto';
-import { CreatePostInput, PostCreatedInput } from './interfaces/inputs';
+import {
+  CreatePostInput,
+  PostCreatedInput,
+  PostsInput,
+} from './interfaces/inputs';
 import { CreatePostResponse, PostResponse } from './interfaces/responses';
+import { PostsService } from './posts.service';
 
 @Resolver()
 export class PostsResolver {
@@ -27,7 +32,14 @@ export class PostsResolver {
     @Inject(GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN)
     private readonly gqlSubscriptionsPubSub: AmqpPubSub,
     private readonly jwtService: JwtService,
+    private readonly postsService: PostsService,
   ) {}
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => [PostResponse])
+  async posts(@Args('input') input: PostsInput): Promise<PostResponse[]> {
+    return this.postsService.postsByRoom(input.roomId);
+  }
 
   @UseGuards(GqlAuthGuard)
   @Mutation(() => CreatePostResponse)

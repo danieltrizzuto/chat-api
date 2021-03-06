@@ -25,6 +25,11 @@ type PostResponse {
 
 type Query {
   user: User!
+  posts(input: PostsInput!): [PostResponse!]!
+}
+
+input PostsInput {
+  roomId: String!
 }
 
 type Mutation {

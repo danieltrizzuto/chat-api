@@ -13,3 +13,9 @@ export class PostCreatedInput {
   @Field()
   accessToken: string;
 }
+
+@InputType()
+export class PostsInput {
+  @Field()
+  roomId: string;
+}
