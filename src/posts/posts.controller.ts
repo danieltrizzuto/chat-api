@@ -2,18 +2,23 @@ import { Controller, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy, EventPattern, Payload } from '@nestjs/microservices';
 import { AmqpPubSub } from 'graphql-rabbitmq-subscriptions';
+import { BotOutboundEventPayload } from 'src/common/dto';
 import { UsersService } from 'src/users/users.service';
 import {
-  GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN,
-  MESSAGE_CREATED_PATTERN,
-  MESSAGE_INTERNAL_REQUEST_PATTERN,
-  RBMQ_PROXY_TOKEN,
-} from './constants';
+  BOT_POST_REQUEST,
+  STOCK_COMMAND_RECEIVED,
+} from './../common/constants/index';
 import {
-  MESSAGE_ACCEPTED_PATTERN,
-  MESSAGE_EXTERNAL_REQUEST_PATTERN,
-} from './constants/index';
-import { ExternalPostEventData, InternalPostEventData } from './interfaces/dto';
+  API_RBMQ_PROXY_TOKEN,
+  GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN,
+  NEW_POST_CREATED,
+  NEW_POST_REQUEST_RECEIVED,
+} from './constants';
+import { NEW_POST_ACCEPTED } from './constants/index';
+import {
+  ClientPostRequestEventPayload,
+  PostAcceptedEventPayload,
+} from './interfaces/dto';
 import { PostResponse } from './interfaces/responses';
 import { isCommand } from './logic/is-command';
 import { PostsService } from './posts.service';
@@ -24,40 +29,50 @@ export class PostsController {
     private readonly usersService: UsersService,
     private readonly postsService: PostsService,
     private readonly jwtService: JwtService,
-    @Inject(RBMQ_PROXY_TOKEN) private rbmqProxy: ClientProxy,
+    @Inject(API_RBMQ_PROXY_TOKEN) private rbmqProxy: ClientProxy,
     @Inject(GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN)
     private readonly gqlSubscriptionsPubSub: AmqpPubSub,
   ) {}
 
-  @EventPattern(MESSAGE_INTERNAL_REQUEST_PATTERN)
-  async handleInternalMessageRequest(@Payload() data: InternalPostEventData) {
+  @EventPattern(NEW_POST_REQUEST_RECEIVED)
+  async handleClientPostRequest(
+    @Payload() payload: ClientPostRequestEventPayload,
+  ) {
     const {
       post: { body, roomId, userId },
-    } = data;
+    } = payload;
 
     if (!body || !roomId || !userId) {
       return;
     }
 
-    if (!isCommand(body)) {
-      this.rbmqProxy.emit(MESSAGE_ACCEPTED_PATTERN, data);
+    if (isCommand(body)) {
+      // Sign roomId to assure bot identity and prevent bot from posting on another room
+      const roomToken = this.jwtService.sign(
+        { roomId },
+        { expiresIn: '5 minutes' },
+      );
+      this.rbmqProxy.emit(STOCK_COMMAND_RECEIVED, { body, roomToken });
+
       return;
     }
 
-    // Sign roomId to prevent bot from posting on another room
-    const roomToken = this.jwtService.sign(roomId, { expiresIn: '5m' });
-    // Bot(s) will take from here
-    this.rbmqProxy.emit('', { body, roomToken });
+    const user = await this.usersService.findOne({ _id: userId });
+    const emitPayload: PostAcceptedEventPayload = {
+      userId: user._id,
+      author: user.username,
+      body,
+      roomId,
+    };
+    this.rbmqProxy.emit(NEW_POST_ACCEPTED, emitPayload);
     return;
   }
 
-  @EventPattern(MESSAGE_EXTERNAL_REQUEST_PATTERN)
-  async handleExternalMessageRequest(@Payload() data: ExternalPostEventData) {
-    const {
-      post: { roomToken, body },
-    } = data;
+  @EventPattern(BOT_POST_REQUEST)
+  async handleBotPostRequest(@Payload() payload: BotOutboundEventPayload) {
+    const { roomToken, body, botName } = payload;
 
-    if (!body || !roomToken) {
+    if (!body || !roomToken || !botName) {
       return;
     }
 
@@ -68,31 +83,38 @@ export class PostsController {
       return;
     }
 
-    this.rbmqProxy.emit(MESSAGE_ACCEPTED_PATTERN, data);
+    const { roomId } = this.jwtService.decode(roomToken) as { roomId: string };
+
+    const emitPayload: PostAcceptedEventPayload = {
+      body,
+      author: botName,
+      roomId,
+    };
+
+    this.rbmqProxy.emit(NEW_POST_ACCEPTED, emitPayload);
   }
 
-  @EventPattern(MESSAGE_ACCEPTED_PATTERN)
-  async handleMessageAccepted(@Payload() data: InternalPostEventData) {
-    const {
-      post: { userId, body, roomId },
-    } = data;
+  @EventPattern(NEW_POST_ACCEPTED)
+  async handlePostAccepted(@Payload() payload: PostAcceptedEventPayload) {
+    const { author, body, roomId, userId } = payload;
 
-    if (!body || !roomId || !userId) {
+    if (!author || !body || !roomId) {
       return;
     }
 
-    const post = await this.postsService.createPost(userId, roomId, body);
-    const user = await this.usersService.findOne({ _id: userId });
+    const post = await this.postsService.createPost(
+      author,
+      body,
+      roomId,
+      userId,
+    );
     const response: PostResponse = {
       _id: post._id,
       body: post.body,
-      user: {
-        _id: user._id,
-        username: user.username,
-      },
+      author: post.author,
     };
 
-    this.gqlSubscriptionsPubSub.publish(MESSAGE_CREATED_PATTERN, {
+    this.gqlSubscriptionsPubSub.publish(NEW_POST_CREATED, {
       postCreated: response,
     });
 

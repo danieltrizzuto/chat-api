@@ -20,7 +20,7 @@ type CreatePostResponse {
 type PostResponse {
   _id: String!
   body: String!
-  user: User!
+  author: String!
 }
 
 type Query {

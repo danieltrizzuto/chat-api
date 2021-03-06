@@ -1,5 +1,4 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { User } from 'src/users/interfaces/responses';
 
 @ObjectType()
 export class CreatePostResponse {
@@ -16,5 +15,5 @@ export class PostResponse {
   body: string;
 
   @Field()
-  user: User;
+  author: string;
 }

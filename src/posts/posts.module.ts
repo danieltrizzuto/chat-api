@@ -8,8 +8,8 @@ import { AuthModule } from 'src/auth/auth.module';
 import { EnvironmentVariables } from 'src/configuration';
 import { UsersModule } from './../users/users.module';
 import {
+  API_RBMQ_PROXY_TOKEN,
   GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN,
-  RBMQ_PROXY_TOKEN,
 } from './constants/index';
 import { PostsController } from './posts.controller';
 import { PostsResolver } from './posts.resolver';
@@ -28,7 +28,7 @@ const logger: any = ConsoleLogger.create('Chat API');
     ClientsModule.registerAsync([
       {
         imports: [ConfigModule],
-        name: RBMQ_PROXY_TOKEN,
+        name: API_RBMQ_PROXY_TOKEN,
         useFactory: (config: ConfigService) => {
           const broker = config.get<EnvironmentVariables['broker']>('broker');
           return {

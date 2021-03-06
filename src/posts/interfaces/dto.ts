@@ -1,4 +1,4 @@
-export interface InternalPostEventData {
+export interface ClientPostRequestEventPayload {
   post: {
     body: string;
     roomId: string;
@@ -6,9 +6,9 @@ export interface InternalPostEventData {
   };
 }
 
-export interface ExternalPostEventData {
-  post: {
-    roomToken: string;
-    body: string;
-  };
+export interface PostAcceptedEventPayload {
+  author: string;
+  userId?: string;
+  body: string;
+  roomId: string;
 }

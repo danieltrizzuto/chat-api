@@ -11,19 +11,19 @@ import { AmqpPubSub } from 'graphql-rabbitmq-subscriptions';
 import { GqlAuthGuard } from 'src/auth/decorators/auth.guard';
 import { CurrentUser, TokenUser } from 'src/auth/decorators/current-user';
 import {
+  API_RBMQ_PROXY_TOKEN,
   GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN,
-  MESSAGE_CREATED_PATTERN,
-  MESSAGE_INTERNAL_REQUEST_PATTERN,
-  RBMQ_PROXY_TOKEN,
+  NEW_POST_CREATED,
+  NEW_POST_REQUEST_RECEIVED,
 } from './constants';
-import { InternalPostEventData } from './interfaces/dto';
+import { ClientPostRequestEventPayload } from './interfaces/dto';
 import { CreatePostInput, PostCreatedInput } from './interfaces/inputs';
 import { CreatePostResponse, PostResponse } from './interfaces/responses';
 
 @Resolver()
 export class PostsResolver {
   constructor(
-    @Inject(RBMQ_PROXY_TOKEN) private rbmqProxy: ClientProxy,
+    @Inject(API_RBMQ_PROXY_TOKEN) private rbmqProxy: ClientProxy,
     @Inject(GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN)
     private readonly gqlSubscriptionsPubSub: AmqpPubSub,
     private readonly jwtService: JwtService,
@@ -39,9 +39,12 @@ export class PostsResolver {
       const { roomId, body } = input;
 
       await this.rbmqProxy
-        .emit<string, InternalPostEventData>(MESSAGE_INTERNAL_REQUEST_PATTERN, {
-          post: { body, roomId, userId: user._id },
-        })
+        .emit<string, ClientPostRequestEventPayload>(
+          NEW_POST_REQUEST_RECEIVED,
+          {
+            post: { body, roomId, userId: user._id },
+          },
+        )
         .toPromise();
 
       return {
@@ -63,6 +66,6 @@ export class PostsResolver {
       throw new UnauthorizedException();
     }
 
-    return this.gqlSubscriptionsPubSub.asyncIterator(MESSAGE_CREATED_PATTERN);
+    return this.gqlSubscriptionsPubSub.asyncIterator(NEW_POST_CREATED);
   }
 }

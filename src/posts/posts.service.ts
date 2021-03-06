@@ -11,10 +11,16 @@ export class PostsService {
     private postModel: Model<PostDocument>,
   ) {}
 
-  async createPost(userId: string, roomId: string, body: string) {
+  async createPost(
+    author: string,
+    body: string,
+    roomId: string,
+    userId?: string,
+  ) {
     const post = await this.postModel.create({
       _id: v4(),
       userId,
+      author,
       body,
       roomId,
     });
