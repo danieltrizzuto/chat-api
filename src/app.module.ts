@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import configuration, { EnvironmentVariables } from './configuration';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
+import { BotModule } from './bot/bot.module';
 
 function getEnvFilePath() {
   switch (process.env.NODE_ENV) {
@@ -60,6 +61,7 @@ function getEnvFilePath() {
     AuthModule,
     UsersModule,
     PostsModule,
+    BotModule,
   ],
   controllers: [AppController],
   providers: [AppService],
