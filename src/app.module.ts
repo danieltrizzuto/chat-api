@@ -50,6 +50,7 @@ function getEnvFilePath() {
       useFactory: (config: ConfigService<EnvironmentVariables>) => {
         const isProd = config.get<string>('env') === 'production';
         return {
+          installSubscriptionHandlers: true,
           debug: !isProd,
           playground: !isProd,
           autoSchemaFile: join(process.cwd(), 'src/schema.gql'),

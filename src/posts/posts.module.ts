@@ -1,27 +1,34 @@
+import { ConsoleLogger } from '@cdm-logger/server';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AmqpPubSub } from 'graphql-rabbitmq-subscriptions';
 import { EnvironmentVariables } from 'src/configuration';
-import { RBMQ_PROXY_TOKEN } from './constants/index';
+import { UsersModule } from './../users/users.module';
+import {
+  RBMQ_PROXY_TOKEN,
+  SUBSCRIPTIONS_PUB_SUB_TOKEN,
+} from './constants/index';
 import { PostsController } from './posts.controller';
 import { PostsResolver } from './posts.resolver';
 import { PostsService } from './posts.service';
 import { PostDocument, PostSchema } from './schemas/post.schema';
 
+const logger: any = ConsoleLogger.create('Chat API');
 @Module({
   imports: [
+    ConfigModule,
+    UsersModule,
     MongooseModule.forFeature([
       { name: PostDocument.name, schema: PostSchema },
     ]),
-    ConfigModule,
     ClientsModule.registerAsync([
       {
         imports: [ConfigModule],
         name: RBMQ_PROXY_TOKEN,
         useFactory: (config: ConfigService) => {
           const broker = config.get<EnvironmentVariables['broker']>('broker');
-
           return {
             transport: Transport.RMQ,
             options: {
@@ -37,7 +44,21 @@ import { PostDocument, PostSchema } from './schemas/post.schema';
       },
     ]),
   ],
-  providers: [PostsResolver, PostsService],
+  providers: [
+    PostsResolver,
+    PostsService,
+    {
+      provide: SUBSCRIPTIONS_PUB_SUB_TOKEN,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const broker = config.get<EnvironmentVariables['broker']>('broker');
+        return new AmqpPubSub({
+          config: broker.uri,
+          logger,
+        });
+      },
+    },
+  ],
   controllers: [PostsController],
 })
 export class PostsModule {}

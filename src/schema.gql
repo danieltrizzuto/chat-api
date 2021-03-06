@@ -17,6 +17,12 @@ type CreatePostResponse {
   success: Boolean!
 }
 
+type PostResponse {
+  _id: String!
+  body: String!
+  user: User!
+}
+
 type Query {
   user: User!
 }
@@ -35,4 +41,8 @@ input AuthInput {
 input CreatePostInput {
   roomId: String!
   body: String!
+}
+
+type Subscription {
+  postCreated: PostResponse!
 }
