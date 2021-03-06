@@ -5,6 +5,9 @@ export interface EnvironmentVariables {
   database: {
     uri: string;
   };
+  broker: {
+    uri: string;
+  };
 }
 
 export default (): EnvironmentVariables => ({
@@ -15,5 +18,9 @@ export default (): EnvironmentVariables => ({
 
   database: {
     uri: process.env.MONGO_URI,
+  },
+
+  broker: {
+    uri: process.env.BROKER_URI,
   },
 });

@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import configuration, { EnvironmentVariables } from './configuration';
+import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
 
 function getEnvFilePath() {
@@ -57,6 +58,7 @@ function getEnvFilePath() {
     }),
     AuthModule,
     UsersModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

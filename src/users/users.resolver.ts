@@ -1,6 +1,7 @@
 import { UseGuards } from '@nestjs/common';
 import { Query, Resolver } from '@nestjs/graphql';
-import { GqlAuthGuard } from 'src/auth/auth.guard';
+import { GqlAuthGuard } from 'src/auth/decorators/auth.guard';
+import { CurrentUser, TokenUser } from 'src/auth/decorators/current-user';
 import { UsersService } from 'src/users/users.service';
 import { User } from './interfaces/responses';
 
@@ -10,10 +11,7 @@ export class UsersResolver {
 
   @UseGuards(GqlAuthGuard)
   @Query(() => User)
-  async user(): Promise<User> {
-    return {
-      _id: '1',
-      username: 'ad',
-    };
+  async user(@CurrentUser() user: TokenUser): Promise<User> {
+    return user;
   }
 }

@@ -13,6 +13,10 @@ type AuthResponse {
   user: User!
 }
 
+type CreatePostResponse {
+  _id: String!
+}
+
 type Query {
   user: User!
 }
@@ -20,9 +24,15 @@ type Query {
 type Mutation {
   signUp(input: AuthInput!): AuthResponse!
   login(input: AuthInput!): AuthResponse!
+  createPost(input: CreatePostInput!): CreatePostResponse!
 }
 
 input AuthInput {
   username: String!
   password: String!
+}
+
+input CreatePostInput {
+  roomId: String!
+  body: String!
 }
