@@ -16,4 +16,7 @@ export class PostResponse {
 
   @Field()
   author: string;
+
+  @Field()
+  roomId: string;
 }

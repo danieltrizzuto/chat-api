@@ -70,7 +70,16 @@ export class PostsResolver {
     }
   }
 
-  @Subscription((returns) => PostResponse)
+  @Subscription((returns) => PostResponse, {
+    filter: (
+      messagePayload: { postCreated: PostResponse },
+      variables: { input: PostCreatedInput },
+    ) => {
+      return (
+        variables.input.subscribedRoom === messagePayload.postCreated.roomId
+      );
+    },
+  })
   postCreated(@Args('input') input: PostCreatedInput) {
     try {
       this.jwtService.verify(input.accessToken);

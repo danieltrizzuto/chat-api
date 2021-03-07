@@ -21,6 +21,7 @@ type PostResponse {
   _id: String!
   body: String!
   author: String!
+  roomId: String!
 }
 
 type Query {
@@ -54,4 +55,5 @@ type Subscription {
 
 input PostCreatedInput {
   accessToken: String!
+  subscribedRoom: String!
 }

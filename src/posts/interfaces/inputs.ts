@@ -12,6 +12,9 @@ export class CreatePostInput {
 export class PostCreatedInput {
   @Field()
   accessToken: string;
+
+  @Field()
+  subscribedRoom: string;
 }
 
 @InputType()

@@ -112,6 +112,7 @@ export class PostsController {
       _id: post._id,
       body: post.body,
       author: post.author,
+      roomId,
     };
 
     this.gqlSubscriptionsPubSub.publish(NEW_POST_CREATED, {
