@@ -24,6 +24,9 @@ export class PostsService {
       body,
       roomId,
     });
+    if (!post) {
+      return null;
+    }
     return post.toObject();
   }
 
