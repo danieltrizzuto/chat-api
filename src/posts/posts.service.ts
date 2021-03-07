@@ -32,7 +32,7 @@ export class PostsService {
   }
 
   async postsByRoom(roomId: string) {
-    const roomPostsCount = await this.postModel.count({ roomId });
+    const roomPostsCount = await this.postModel.countDocuments({ roomId });
     const skip = Math.max(roomPostsCount - MAX_POSTS_TO_RETURN, 0);
     return this.postModel.find({ roomId }).skip(skip);
   }
