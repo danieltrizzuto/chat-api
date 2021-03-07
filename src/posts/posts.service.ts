@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { v4 } from 'uuid';
+import { MAX_POSTS_TO_RETURN } from './constants';
 import { PostDocument } from './schemas/post.schema';
 
 @Injectable()
@@ -31,6 +32,8 @@ export class PostsService {
   }
 
   async postsByRoom(roomId: string) {
-    return this.postModel.find({ roomId });
+    const roomPostsCount = await this.postModel.count({ roomId });
+    const skip = Math.max(roomPostsCount - MAX_POSTS_TO_RETURN, 0);
+    return this.postModel.find({ roomId }).skip(skip);
   }
 }

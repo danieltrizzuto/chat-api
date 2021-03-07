@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, LeanDocument, Model } from 'mongoose';
 import { v4 } from 'uuid';
@@ -27,7 +31,7 @@ export class UsersService {
       passwordHash,
     });
     if (!user) {
-      return null;
+      throw new UnprocessableEntityException();
     }
     return user.toObject();
   }
