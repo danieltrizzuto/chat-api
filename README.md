@@ -36,7 +36,7 @@ $ yarn
 $ yarn start
 ```
 
-After running, the GraphQL Playgroung is available. Open [http://localhost:4100](http://localhost:4100) to view it in the browser after running.
+After running, the GraphQL Playgroung is available. Open [http://localhost:4100/graphql](http://localhost:4100/graphql) to view it in the browser after running.
 
 ## Test
 
