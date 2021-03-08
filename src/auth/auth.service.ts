@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/interfaces/responses';
 import { UsersService } from '../users/users.service';
-import { verifyPassword } from './auth.logic';
+import { verifyPassword } from './logic/verify-password';
 
 interface Tokens {
   accessToken: string;

@@ -1,10 +1,10 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { UsersService } from 'src/users/users.service';
-import { hashPassword } from './auth.logic';
 import { AuthService } from './auth.service';
 import { AuthInput } from './interfaces/inputs';
 import { AuthResponse } from './interfaces/responses';
+import { hashPassword } from './logic/hash-password';
 
 @Resolver()
 export class AuthResolver {
