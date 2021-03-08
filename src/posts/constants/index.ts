@@ -8,3 +8,4 @@ export const GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN =
 export const NEW_POST_REQUEST_RECEIVED = 'new.post.requested';
 export const NEW_POST_ACCEPTED = 'new.post.accepted';
 export const NEW_POST_CREATED = 'new.post.created';
+export const NEW_POST_ERROR = 'new.post.error';

@@ -20,3 +20,18 @@ export class PostResponse {
   @Field()
   roomId: string;
 }
+
+@ObjectType()
+export class PostErrorResponse {
+  @Field()
+  body: string;
+
+  @Field()
+  author: string;
+
+  @Field()
+  roomId: string;
+
+  @Field()
+  userId: string;
+}

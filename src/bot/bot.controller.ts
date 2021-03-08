@@ -1,4 +1,8 @@
-import { Controller, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Inject,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ClientProxy, EventPattern, Payload } from '@nestjs/microservices';
 import {
   BotInboundEventPayload,
@@ -21,27 +25,40 @@ export class BotController {
 
   @EventPattern(STOCK_COMMAND_RECEIVED)
   async handleStockCommand(@Payload() data: BotInboundEventPayload) {
-    const { body, roomToken } = data;
+    const { body, roomToken, userId } = data;
 
-    if (!body || !roomToken) {
+    if (!body || !roomToken || !userId) {
       return;
     }
 
-    const [_, stockTicker] = body.split('/stock=');
-    const stockData = await this.botService.getStockData(stockTicker);
+    try {
+      const [_, stockTicker] = body.split('/stock=');
+      const stockData = await this.botService.getStockData(stockTicker);
 
-    if (!isDataValid(stockData)) {
-      return;
+      if (!isDataValid(stockData)) {
+        throw new UnprocessableEntityException();
+      }
+
+      const formattedMessage = `${stockData.Symbol} quote is $${stockData.Close} per share.`;
+
+      const payload: BotOutboundEventPayload = {
+        body: formattedMessage,
+        roomToken,
+        botName: BOT_NAME,
+        userId,
+      };
+
+      this.rbmqProxy.emit(BOT_POST_REQUEST, payload);
+    } catch {
+      const errorPayload: BotOutboundEventPayload = {
+        body,
+        roomToken,
+        botName: BOT_NAME,
+        userId,
+        error: true,
+      };
+
+      this.rbmqProxy.emit(BOT_POST_REQUEST, errorPayload);
     }
-
-    const formattedMessage = `${stockData.Symbol} quote is $${stockData.Close} per share.`;
-
-    const payload: BotOutboundEventPayload = {
-      body: formattedMessage,
-      roomToken,
-      botName: BOT_NAME,
-    };
-
-    this.rbmqProxy.emit(BOT_POST_REQUEST, payload);
   }
 }

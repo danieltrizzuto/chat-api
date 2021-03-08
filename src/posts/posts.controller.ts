@@ -2,7 +2,10 @@ import { Controller, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy, EventPattern, Payload } from '@nestjs/microservices';
 import { AmqpPubSub } from 'graphql-rabbitmq-subscriptions';
-import { BotOutboundEventPayload } from 'src/common/dto';
+import {
+  BotInboundEventPayload,
+  BotOutboundEventPayload,
+} from 'src/common/dto';
 import { UsersService } from 'src/users/users.service';
 import {
   BOT_POST_REQUEST,
@@ -14,12 +17,13 @@ import {
   NEW_POST_CREATED,
   NEW_POST_REQUEST_RECEIVED,
 } from './constants';
-import { NEW_POST_ACCEPTED } from './constants/index';
+import { NEW_POST_ACCEPTED, NEW_POST_ERROR } from './constants/index';
 import {
   ClientPostRequestEventPayload,
   PostAcceptedEventPayload,
+  PostErrorEventPayload,
 } from './interfaces/dto';
-import { PostResponse } from './interfaces/responses';
+import { PostErrorResponse, PostResponse } from './interfaces/responses';
 import { isCommand } from './logic/is-command';
 import { PostsService } from './posts.service';
 
@@ -52,7 +56,14 @@ export class PostsController {
         { roomId },
         { expiresIn: '5 minutes' },
       );
-      this.rbmqProxy.emit(STOCK_COMMAND_RECEIVED, { body, roomToken });
+
+      const botPayload: BotInboundEventPayload = {
+        body,
+        roomToken,
+        userId,
+      };
+
+      this.rbmqProxy.emit(STOCK_COMMAND_RECEIVED, botPayload);
 
       return;
     }
@@ -70,9 +81,9 @@ export class PostsController {
 
   @EventPattern(BOT_POST_REQUEST)
   async handleBotPostRequest(@Payload() payload: BotOutboundEventPayload) {
-    const { roomToken, body, botName } = payload;
+    const { roomToken, body, botName, userId, error } = payload;
 
-    if (!body || !roomToken || !botName) {
+    if (!body || !roomToken || !botName || !userId) {
       return;
     }
 
@@ -89,9 +100,16 @@ export class PostsController {
       body,
       author: botName,
       roomId,
+      userId,
     };
 
-    this.rbmqProxy.emit(NEW_POST_ACCEPTED, emitPayload);
+    if (!error) {
+      this.rbmqProxy.emit(NEW_POST_ACCEPTED, emitPayload);
+      return;
+    }
+
+    this.rbmqProxy.emit(NEW_POST_ERROR, emitPayload);
+    return;
   }
 
   @EventPattern(NEW_POST_ACCEPTED)
@@ -108,6 +126,7 @@ export class PostsController {
       roomId,
       userId,
     );
+
     const response: PostResponse = {
       _id: post._id,
       body: post.body,
@@ -120,5 +139,25 @@ export class PostsController {
     });
 
     return post;
+  }
+
+  @EventPattern(NEW_POST_ERROR)
+  async handlePostError(@Payload() payload: PostErrorEventPayload) {
+    const { author, body, roomId, userId } = payload;
+
+    if (!author || !body || !roomId || !userId) {
+      return;
+    }
+
+    const response: PostErrorResponse = {
+      body,
+      author,
+      roomId,
+      userId,
+    };
+
+    this.gqlSubscriptionsPubSub.publish(NEW_POST_ERROR, {
+      postError: response,
+    });
   }
 }

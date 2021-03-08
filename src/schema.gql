@@ -24,6 +24,13 @@ type PostResponse {
   roomId: String!
 }
 
+type PostErrorResponse {
+  body: String!
+  author: String!
+  roomId: String!
+  userId: String!
+}
+
 type Query {
   user: User!
   posts(input: PostsInput!): [PostResponse!]!
@@ -51,9 +58,15 @@ input CreatePostInput {
 
 type Subscription {
   postCreated(input: PostCreatedInput!): PostResponse!
+  postError(input: PostErrorInput!): PostErrorResponse!
 }
 
 input PostCreatedInput {
   accessToken: String!
   subscribedRoom: String!
+}
+
+input PostErrorInput {
+  accessToken: String!
+  userId: String!
 }

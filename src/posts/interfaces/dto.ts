@@ -8,6 +8,13 @@ export interface ClientPostRequestEventPayload {
 
 export interface PostAcceptedEventPayload {
   author: string;
+  userId: string;
+  body: string;
+  roomId: string;
+}
+
+export interface PostErrorEventPayload {
+  author: string;
   userId?: string;
   body: string;
   roomId: string;

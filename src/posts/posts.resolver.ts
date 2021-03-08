@@ -14,15 +14,24 @@ import {
   API_RBMQ_PROXY_TOKEN,
   GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN,
   NEW_POST_CREATED,
+  NEW_POST_ERROR,
   NEW_POST_REQUEST_RECEIVED,
 } from './constants';
-import { ClientPostRequestEventPayload } from './interfaces/dto';
+import {
+  ClientPostRequestEventPayload,
+  PostErrorEventPayload,
+} from './interfaces/dto';
 import {
   CreatePostInput,
   PostCreatedInput,
+  PostErrorInput,
   PostsInput,
 } from './interfaces/inputs';
-import { CreatePostResponse, PostResponse } from './interfaces/responses';
+import {
+  CreatePostResponse,
+  PostErrorResponse,
+  PostResponse,
+} from './interfaces/responses';
 import { PostsService } from './posts.service';
 
 @Resolver()
@@ -88,5 +97,23 @@ export class PostsResolver {
     }
 
     return this.gqlSubscriptionsPubSub.asyncIterator(NEW_POST_CREATED);
+  }
+
+  @Subscription((returns) => PostErrorResponse, {
+    filter: (
+      messagePayload: { postError: PostErrorEventPayload },
+      variables: { input: PostErrorInput },
+    ) => {
+      return variables.input.userId === messagePayload.postError.userId;
+    },
+  })
+  postError(@Args('input') input: PostErrorInput) {
+    try {
+      this.jwtService.verify(input.accessToken);
+    } catch {
+      throw new UnauthorizedException();
+    }
+
+    return this.gqlSubscriptionsPubSub.asyncIterator(NEW_POST_ERROR);
   }
 }

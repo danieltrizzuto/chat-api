@@ -22,3 +22,12 @@ export class PostsInput {
   @Field()
   roomId: string;
 }
+
+@InputType()
+export class PostErrorInput {
+  @Field()
+  accessToken: string;
+
+  @Field()
+  userId: string;
+}
