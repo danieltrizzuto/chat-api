@@ -24,6 +24,31 @@
 
 Chat API
 
+### Regular post:
+
+1. `createPost` Mutation emits a `new.post.requested` message to `posts` queue at RabbitMQ and returns `success: true` to the client;
+2. `new.post.requested` consumer emits a `new.post.accepted` with post params (author, body, roomId and userId);
+3. `new.post.accepted` consumer creates the post at the DB and emits a `new.post.created` message at a `fanout` RabbitMQ exchange (Pub/Sub) making sure all running server instances receive it;
+4. The `postCreated` Subscription is listening for `new.post.created` messages and when a new message is consumed, the connected clients that are listening to the correspondent roomId are notified of a new message via the WebSocket connection.
+
+### Bot post (no error occcurred within the bot:
+
+1. `createPost` Mutation emits a `new.post.requested` message to `posts` queue at RabbitMQ and returns `success: true` to the client;
+2. `new.post.requested` consumer emits a `bot.command.received` with a signed JWT that is valid for only 5 minutes and the post params (author, body, roomId and userId);
+3. The Bot consumes the `bot.command.received`, calls the Stooq API and if the processing is successfull and data are valid, the bot emits a message with the formatted post params to `bot.post.request`;
+4. The `bot.post.request` consumer validates the data, and if everything is fine, emits a message to `new.post.accepted` with post params (`author, body, roomId and userId`);
+5. `new.post.accepted` consumer creates the post at the DB and emits a `new.post.created` message at a `fanout` RabbitMQ exchange (Pub/Sub) making sure all running server instances receive it;
+6. The `postCreated` Subscription is listening for `new.post.created` messages and when a new message is consumed, the connected clients that are listening to the correspondent roomId are notified of a new message via the WebSocket connection.
+
+### Bot post (error occcurred within the bot):
+
+1. `createPost` Mutation emits a `new.post.requested` message to `posts` queue at RabbitMQ and returns `success: true` to the client;
+2. `new.post.requested` consumer emits a `bot.command.received` with a signed JWT that is valid for only 5 minutes and the post params (`author, body, roomId and userId`);
+3. The Bot consumes the `bot.command.received`, calls the Stooq API and if the processing is successfull and data are valid, the bot emits a message with the original post params to `bot.post.request` + `error=true`;
+4. The `bot.post.request` consumer validates the data, and if everything is fine, but error=true, it emits a message to `new.post.error` with original post params (author, body, roomId and userId);
+5. The `new.post.error` consumer emits a `new.post.error.notify` message at a `fanout` RabbitMQ exchange (Pub/Sub) making sure all running server instances receive it;
+6. The `postError` Subscription is listening for `new.post.error.notify` messages and when a new message is consumed, the connected clients that are listening to the correspondent `userId` are notified of a new message via the WebSocket connection.
+
 ## Installation
 
 ```bash

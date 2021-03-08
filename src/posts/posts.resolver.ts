@@ -14,7 +14,7 @@ import {
   API_RBMQ_PROXY_TOKEN,
   GQL_SUBSCRIPTIONS_PUB_SUB_TOKEN,
   NEW_POST_CREATED,
-  NEW_POST_ERROR,
+  NEW_POST_ERROR_NOTIFY,
   NEW_POST_REQUEST_RECEIVED,
 } from './constants';
 import {
@@ -114,6 +114,6 @@ export class PostsResolver {
       throw new UnauthorizedException();
     }
 
-    return this.gqlSubscriptionsPubSub.asyncIterator(NEW_POST_ERROR);
+    return this.gqlSubscriptionsPubSub.asyncIterator(NEW_POST_ERROR_NOTIFY);
   }
 }
