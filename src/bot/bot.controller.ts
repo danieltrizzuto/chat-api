@@ -25,11 +25,11 @@ export class BotController {
 
   @EventPattern(STOCK_COMMAND_RECEIVED)
   async handleStockCommand(@Payload() data: BotInboundEventPayload) {
-    const { body, roomToken, userId } = data;
-
-    if (!body || !roomToken || !userId) {
+    if (!data || !data.body || !data.roomToken || !data.userId) {
       return;
     }
+
+    const { body, roomToken, userId } = data;
 
     try {
       const [_, stockTicker] = body.split('/stock=');

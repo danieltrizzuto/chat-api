@@ -42,13 +42,19 @@ export class PostsController {
   async handleClientPostRequest(
     @Payload() payload: ClientPostRequestEventPayload,
   ) {
+    if (
+      !payload ||
+      !payload.post ||
+      !payload.post.body ||
+      !payload.post.roomId ||
+      !payload.post.userId
+    ) {
+      return;
+    }
+
     const {
       post: { body, roomId, userId },
     } = payload;
-
-    if (!body || !roomId || !userId) {
-      return;
-    }
 
     if (isCommand(body)) {
       // Sign roomId to assure bot identity and prevent bot from posting on another room
@@ -81,11 +87,17 @@ export class PostsController {
 
   @EventPattern(BOT_POST_REQUEST)
   async handleBotPostRequest(@Payload() payload: BotOutboundEventPayload) {
-    const { roomToken, body, botName, userId, error } = payload;
-
-    if (!body || !roomToken || !botName || !userId) {
+    if (
+      !payload ||
+      !payload.roomToken ||
+      !payload.body ||
+      !payload.botName ||
+      !payload.userId
+    ) {
       return;
     }
+
+    const { roomToken, body, botName, userId, error } = payload;
 
     try {
       this.jwtService.verify(roomToken);
@@ -114,11 +126,11 @@ export class PostsController {
 
   @EventPattern(NEW_POST_ACCEPTED)
   async handlePostAccepted(@Payload() payload: PostAcceptedEventPayload) {
-    const { author, body, roomId, userId } = payload;
-
-    if (!author || !body || !roomId) {
+    if (!payload || !payload.author || !payload.body || !payload.roomId) {
       return;
     }
+
+    const { author, body, roomId, userId } = payload;
 
     const post = await this.postsService.createPost(
       author,
@@ -143,11 +155,17 @@ export class PostsController {
 
   @EventPattern(NEW_POST_ERROR)
   async handlePostError(@Payload() payload: PostErrorEventPayload) {
-    const { author, body, roomId, userId } = payload;
-
-    if (!author || !body || !roomId || !userId) {
+    if (
+      !payload ||
+      !payload.author ||
+      !payload.body ||
+      !payload.roomId ||
+      !payload.userId
+    ) {
       return;
     }
+
+    const { author, body, roomId, userId } = payload;
 
     const response: PostErrorResponse = {
       body,
