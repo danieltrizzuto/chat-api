@@ -40,7 +40,7 @@ $ yarn start
 $ yarn start:dev
 
 # production mode
-$ yarn start
+$ yarn start:prod
 ```
 
 ## Test
