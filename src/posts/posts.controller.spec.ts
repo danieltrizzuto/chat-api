@@ -13,6 +13,7 @@ import {
   NEW_POST_ACCEPTED,
   NEW_POST_CREATED,
   NEW_POST_ERROR,
+  NEW_POST_ERROR_NOTIFY,
 } from './constants';
 import { PostAcceptedEventPayload } from './interfaces/dto';
 import { PostErrorResponse, PostResponse } from './interfaces/responses';
@@ -254,7 +255,7 @@ describe('PostsController', () => {
     expect(gqlPubSubPublishSpy).not.toBeCalled();
   });
 
-  it('handlePostError should publish on NEW_POST_ERROR if params are valid', async () => {
+  it('handlePostError should publish on NEW_POST_ERROR_NOTIFY if params are valid', async () => {
     const gqlPubSubPublishSpy = jest.spyOn(gqlSubscriptionsPubSub, 'publish');
 
     await controller.handlePostError({
@@ -271,7 +272,7 @@ describe('PostsController', () => {
       userId: 'userId',
     };
 
-    expect(gqlPubSubPublishSpy).toBeCalledWith(NEW_POST_ERROR, {
+    expect(gqlPubSubPublishSpy).toBeCalledWith(NEW_POST_ERROR_NOTIFY, {
       postError: response,
     });
   });
