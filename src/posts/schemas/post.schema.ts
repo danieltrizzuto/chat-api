@@ -6,17 +6,17 @@ export class PostDocument extends Document {
   @Prop()
   _id: string;
 
-  @Prop()
+  @Prop({ index: true })
   userId?: string;
+
+  @Prop({ index: true })
+  roomId: string;
 
   @Prop()
   body: string;
 
   @Prop()
   author: string;
-
-  @Prop()
-  roomId: string;
 }
 
 export const PostSchema = SchemaFactory.createForClass(PostDocument);

@@ -16,7 +16,7 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       urls: [broker.uri],
-      queue: broker.queue,
+      queue: broker.posts_queue,
       queueOptions: {
         durable: false,
       },

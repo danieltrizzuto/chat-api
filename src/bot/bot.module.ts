@@ -19,7 +19,7 @@ import { BOT_RBMQ_PROXY_TOKEN } from './constants';
             transport: Transport.RMQ,
             options: {
               urls: [broker.uri],
-              queue: broker.queue,
+              queue: broker.posts_queue,
               queueOptions: {
                 durable: false,
               },

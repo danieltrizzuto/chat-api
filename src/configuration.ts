@@ -7,7 +7,7 @@ export interface EnvironmentVariables {
   };
   broker: {
     uri: string;
-    queue: string;
+    posts_queue: string;
   };
 }
 
@@ -23,6 +23,6 @@ export default (): EnvironmentVariables => ({
 
   broker: {
     uri: process.env.BROKER_URI,
-    queue: process.env.POSTS_QUEUE,
+    posts_queue: process.env.POSTS_QUEUE,
   },
 });
