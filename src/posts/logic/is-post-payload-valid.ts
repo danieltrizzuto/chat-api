@@ -3,7 +3,7 @@ import {
   PostErrorEventPayload,
 } from '../interfaces/dto';
 
-export const isBotPostPayloadValid = (
+export const isPostPayloadValid = (
   payload: PostErrorEventPayload | PostAcceptedEventPayload,
 ) => {
   return !!(

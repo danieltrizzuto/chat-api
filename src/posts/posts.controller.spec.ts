@@ -87,25 +87,34 @@ describe('PostsController', () => {
 
   it('handleClientPostRequest should not emit if payload is null', async () => {
     const rbmqProxyEmitSpy = jest.spyOn(rbmqProxy, 'emit');
-    await controller.handleClientPostRequest(null);
+
+    await expect(async () => {
+      await controller.handleClientPostRequest(null);
+    }).rejects.toThrow();
 
     expect(rbmqProxyEmitSpy).not.toBeCalled();
   });
 
   it('handleClientPostRequest should not emit if post is null', async () => {
     const rbmqProxyEmitSpy = jest.spyOn(rbmqProxy, 'emit');
-    await controller.handleClientPostRequest({
-      post: null,
-    });
+
+    await expect(async () => {
+      await controller.handleClientPostRequest({
+        post: null,
+      });
+    }).rejects.toThrow();
 
     expect(rbmqProxyEmitSpy).not.toBeCalled();
   });
 
   it('handleClientPostRequest should not emit if params are null', async () => {
     const rbmqProxyEmitSpy = jest.spyOn(rbmqProxy, 'emit');
-    await controller.handleClientPostRequest({
-      post: { body: null, roomId: null, userId: null },
-    });
+
+    await expect(async () => {
+      await controller.handleClientPostRequest({
+        post: { body: null, roomId: null, userId: null },
+      });
+    }).rejects.toThrow();
 
     expect(rbmqProxyEmitSpy).not.toBeCalled();
   });

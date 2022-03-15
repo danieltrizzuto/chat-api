@@ -30,9 +30,9 @@ import {
   PostErrorEventPayload,
 } from './interfaces/dto';
 import { PostErrorResponse, PostResponse } from './interfaces/responses';
-import { isBotPostPayloadValid } from './logic/is-bot-post-payload-valid';
 import { isBotPostRequestPayloadValid } from './logic/is-bot-post-request-payload-valid';
 import { isCommand } from './logic/is-command';
+import { isPostPayloadValid } from './logic/is-post-payload-valid';
 import { isPostRequestPayloadValid } from './logic/is-post-request-payload-valid';
 import { PostsService } from './posts.service';
 
@@ -52,7 +52,7 @@ export class PostsController {
     @Payload() payload: ClientPostRequestEventPayload,
   ) {
     if (!isPostRequestPayloadValid(payload)) {
-      return;
+      throw new UnprocessableEntityException(payload);
     }
 
     const {
@@ -122,7 +122,7 @@ export class PostsController {
 
   @EventPattern(NEW_POST_ACCEPTED)
   async handlePostAccepted(@Payload() payload: PostAcceptedEventPayload) {
-    if (!isBotPostPayloadValid(payload)) {
+    if (!isPostPayloadValid(payload)) {
       throw new UnprocessableEntityException(payload);
     }
 
@@ -151,7 +151,7 @@ export class PostsController {
 
   @EventPattern(NEW_POST_ERROR)
   async handlePostError(@Payload() payload: PostErrorEventPayload) {
-    if (!isBotPostPayloadValid(payload)) {
+    if (!isPostPayloadValid(payload)) {
       throw new UnprocessableEntityException(payload);
     }
 
