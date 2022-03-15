@@ -25,7 +25,10 @@ import {
   PostErrorEventPayload,
 } from './interfaces/dto';
 import { PostErrorResponse, PostResponse } from './interfaces/responses';
+import { isBotPostPayloadValid } from './logic/is-bot-post-payload-valid';
+import { isBotPostRequestPayloadValid } from './logic/is-bot-post-request-payload-valid';
 import { isCommand } from './logic/is-command';
+import { isPostRequestPayloadValid } from './logic/is-post-request-payload-valid';
 import { PostsService } from './posts.service';
 
 @Controller('posts')
@@ -43,13 +46,7 @@ export class PostsController {
   async handleClientPostRequest(
     @Payload() payload: ClientPostRequestEventPayload,
   ) {
-    if (
-      !payload ||
-      !payload.post ||
-      !payload.post.body ||
-      !payload.post.roomId ||
-      !payload.post.userId
-    ) {
+    if (!isPostRequestPayloadValid(payload)) {
       return;
     }
 
@@ -88,13 +85,7 @@ export class PostsController {
 
   @EventPattern(BOT_POST_REQUEST)
   async handleBotPostRequest(@Payload() payload: BotOutboundEventPayload) {
-    if (
-      !payload ||
-      !payload.roomToken ||
-      !payload.body ||
-      !payload.botName ||
-      !payload.userId
-    ) {
+    if (!isBotPostRequestPayloadValid(payload)) {
       return;
     }
 
@@ -127,7 +118,7 @@ export class PostsController {
 
   @EventPattern(NEW_POST_ACCEPTED)
   async handlePostAccepted(@Payload() payload: PostAcceptedEventPayload) {
-    if (!payload || !payload.author || !payload.body || !payload.roomId) {
+    if (!isBotPostPayloadValid(payload)) {
       return;
     }
 
@@ -156,13 +147,7 @@ export class PostsController {
 
   @EventPattern(NEW_POST_ERROR)
   async handlePostError(@Payload() payload: PostErrorEventPayload) {
-    if (
-      !payload ||
-      !payload.author ||
-      !payload.body ||
-      !payload.roomId ||
-      !payload.userId
-    ) {
+    if (!isBotPostPayloadValid(payload)) {
       return;
     }
 

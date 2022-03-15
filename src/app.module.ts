@@ -6,10 +6,10 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { BotModule } from './bot/bot.module';
 import configuration, { EnvironmentVariables } from './configuration';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
-import { BotModule } from './bot/bot.module';
 
 function getEnvFilePath() {
   switch (process.env.NODE_ENV) {
@@ -23,6 +23,7 @@ function getEnvFilePath() {
       return null;
   }
 }
+
 @Module({
   imports: [
     ConfigModule.forRoot({

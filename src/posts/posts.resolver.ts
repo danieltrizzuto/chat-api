@@ -79,7 +79,7 @@ export class PostsResolver {
     }
   }
 
-  @Subscription((returns) => PostResponse, {
+  @Subscription(() => PostResponse, {
     filter: (
       messagePayload: { postCreated: PostResponse },
       variables: { input: PostCreatedInput },
@@ -99,7 +99,7 @@ export class PostsResolver {
     return this.gqlSubscriptionsPubSub.asyncIterator(NEW_POST_CREATED);
   }
 
-  @Subscription((returns) => PostErrorResponse, {
+  @Subscription(() => PostErrorResponse, {
     filter: (
       messagePayload: { postError: PostErrorEventPayload },
       variables: { input: PostErrorInput },
