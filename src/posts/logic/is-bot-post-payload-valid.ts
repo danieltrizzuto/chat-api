@@ -6,7 +6,7 @@ import {
 export const isBotPostPayloadValid = (
   payload: PostErrorEventPayload | PostAcceptedEventPayload,
 ) => {
-  return (
+  return !!(
     payload &&
     payload.author &&
     payload.body &&

@@ -1,4 +1,9 @@
-import { Controller, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Inject,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ClientProxy, EventPattern, Payload } from '@nestjs/microservices';
 import { AmqpPubSub } from 'graphql-rabbitmq-subscriptions';
@@ -86,7 +91,7 @@ export class PostsController {
   @EventPattern(BOT_POST_REQUEST)
   async handleBotPostRequest(@Payload() payload: BotOutboundEventPayload) {
     if (!isBotPostRequestPayloadValid(payload)) {
-      return;
+      throw new UnprocessableEntityException(payload);
     }
 
     const { roomToken, body, botName, userId, error } = payload;
@@ -94,8 +99,7 @@ export class PostsController {
     try {
       this.jwtService.verify(roomToken);
     } catch {
-      // Invalid roomToken
-      return;
+      throw new UnauthorizedException();
     }
 
     const { roomId } = this.jwtService.decode(roomToken) as { roomId: string };
@@ -119,7 +123,7 @@ export class PostsController {
   @EventPattern(NEW_POST_ACCEPTED)
   async handlePostAccepted(@Payload() payload: PostAcceptedEventPayload) {
     if (!isBotPostPayloadValid(payload)) {
-      return;
+      throw new UnprocessableEntityException(payload);
     }
 
     const { author, body, roomId, userId } = payload;
@@ -148,7 +152,7 @@ export class PostsController {
   @EventPattern(NEW_POST_ERROR)
   async handlePostError(@Payload() payload: PostErrorEventPayload) {
     if (!isBotPostPayloadValid(payload)) {
-      return;
+      throw new UnprocessableEntityException(payload);
     }
 
     const { author, body, roomId, userId } = payload;

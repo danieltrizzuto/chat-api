@@ -3,7 +3,7 @@ import { BotOutboundEventPayload } from 'src/common/dto';
 export const isBotPostRequestPayloadValid = (
   payload: BotOutboundEventPayload,
 ) => {
-  return (
+  return !!(
     payload &&
     payload.roomToken &&
     payload.body &&

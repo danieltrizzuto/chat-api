@@ -3,7 +3,7 @@ import { ClientPostRequestEventPayload } from '../interfaces/dto';
 export const isPostRequestPayloadValid = (
   payload: ClientPostRequestEventPayload,
 ) => {
-  return (
+  return !!(
     payload &&
     payload.post &&
     payload.post.body &&

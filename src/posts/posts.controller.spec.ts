@@ -190,12 +190,14 @@ describe('PostsController', () => {
 
   it('handleBotPostRequest should not emit if params are invalid', async () => {
     const rbmqProxyEmitSpy = jest.spyOn(rbmqProxy, 'emit');
-    await controller.handleBotPostRequest({
-      body: null,
-      botName: null,
-      roomToken: null,
-      userId: null,
-    });
+    await expect(async () => {
+      await controller.handleBotPostRequest({
+        body: null,
+        botName: null,
+        roomToken: null,
+        userId: null,
+      });
+    }).rejects.toThrow();
 
     expect(rbmqProxyEmitSpy).not.toBeCalled();
   });
@@ -206,12 +208,14 @@ describe('PostsController', () => {
     const gqlPubSubPublishSpy = jest.spyOn(gqlSubscriptionsPubSub, 'publish');
     const createPostSpy = jest.spyOn(postsService, 'createPost');
 
-    await controller.handlePostAccepted({
-      author: null,
-      body: null,
-      roomId: null,
-      userId: null,
-    });
+    await expect(async () => {
+      await controller.handlePostAccepted({
+        author: null,
+        body: null,
+        roomId: null,
+        userId: null,
+      });
+    }).rejects.toThrow();
 
     expect(gqlPubSubPublishSpy).not.toBeCalled();
     expect(createPostSpy).not.toBeCalled();
@@ -243,14 +247,17 @@ describe('PostsController', () => {
 
   // Bot errors handle
 
-  it('handlePostError should publish if params are invalid', async () => {
+  it('handlePostError should not publish if params are invalid', async () => {
     const gqlPubSubPublishSpy = jest.spyOn(gqlSubscriptionsPubSub, 'publish');
-    await controller.handlePostError({
-      author: null,
-      body: null,
-      roomId: null,
-      userId: null,
-    });
+
+    await expect(async () => {
+      await controller.handlePostError({
+        author: null,
+        body: null,
+        roomId: null,
+        userId: null,
+      });
+    }).rejects.toThrow();
 
     expect(gqlPubSubPublishSpy).not.toBeCalled();
   });
