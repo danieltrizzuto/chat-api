@@ -1,6 +1,11 @@
-import { PostErrorEventPayload } from '../interfaces/dto';
+import {
+  PostAcceptedEventPayload,
+  PostErrorEventPayload,
+} from '../interfaces/dto';
 
-export const isBotPostPayloadValid = (payload: PostErrorEventPayload || PostAcceptedEventPayload) => {
+export const isBotPostPayloadValid = (
+  payload: PostErrorEventPayload | PostAcceptedEventPayload,
+) => {
   return (
     payload &&
     payload.author &&
