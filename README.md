@@ -31,7 +31,7 @@ Chat API
 3. `new.post.accepted` consumer creates the post at the DB and emits a `new.post.created` message at a `fanout` RabbitMQ exchange (Pub/Sub) making sure all running server instances receive it;
 4. The `postCreated` Subscription is listening for `new.post.created` messages and when a new message is consumed, the connected clients that are listening to the correspondent roomId are notified of a new message via the WebSocket connection.
 
-### Bot post (no error occcurred within the bot:
+### Bot post (no error occcurred within the bot):
 
 1. `createPost` Mutation emits a `new.post.requested` message to `posts` queue at RabbitMQ and returns `success: true` to the client;
 2. `new.post.requested` consumer emits a `bot.command.received` with a signed JWT that is valid for only 5 minutes and the post params (`author, body, roomId and userId`);
